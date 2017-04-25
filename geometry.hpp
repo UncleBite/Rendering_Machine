@@ -57,10 +57,7 @@ class Ray{
 public:
     Vector3 origin;
     Vector3 direction;
-    /*
-     * Parameter function:
-     * (ORIx+DIRx*t, ORIy+DIRy*t, ORIz+DIRz*t)
-     */
+
     Ray():origin(Vector3()),direction(Vector3(0,0,1)){
     }
     Ray(Vector3 o, Vector3 d):origin(o){
@@ -87,9 +84,9 @@ public:
     }
 
     virtual Vector3 getNormal(Vector3 point)=0;
-    /*
-     * Return value: if is intersected.
-     */
+    
+   
+     
     virtual bool isIntersected(Ray ray, double& distance)=0;
 };
 
