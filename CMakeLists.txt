@@ -10,14 +10,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5 COMPONENTS Gui REQUIRED)
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 # EDIT: add your (non-test) source files to this list
-set(src
-  
+set(src geometry.hpp
+	
   )
 
 # EDIT: add any additional test source files to this list
-set(test_src unittests.cpp)
+set(test_src catch.hpp unittests.cpp test_ray.cpp)
 
 # You should not need to edit below this line
 #-----------------------------------------------------------------------
@@ -28,12 +29,27 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 # create unittests
 add_executable(unittests catch.hpp ${test_src} ${src})
 target_link_libraries(unittests Qt5::Gui)
+target_link_libraries(unittests Qt5::Widgets)
+if(UNIX AND CMAKE_COMPILER_IS_GNUCXX)
+  target_link_libraries(unittests Qt5::Gui pthread)
+else(UNIX AND CMAKE_COMPILER_IS_GNUCXX)  
+  target_link_libraries(unittests Qt5::Gui)
+endif()
 
 # create the vtray executable
 add_executable(vtray vtray.cpp ${src})
 target_link_libraries(vtray Qt5::Gui)
+target_link_libraries(vtray Qt5::Widgets)
 
+if(UNIX AND CMAKE_COMPILER_IS_GNUCXX)
+  target_link_libraries(vtray Qt5::Gui pthread)
+else(UNIX AND CMAKE_COMPILER_IS_GNUCXX)  
+  target_link_libraries(vtray Qt5::Gui)
+endif()
 enable_testing()
+
+
+
 
 # unit tests
 add_test(unit unittests)

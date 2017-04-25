@@ -123,20 +123,22 @@ bool Sphere::isIntersected(Ray ray, double& distance){
     double delta=b*b-4*a*c;
     if(delta<0) {
         return false;
-    } else {
+    }
         double t1, t2;
         t1=(-b-sqrt(delta))/(2*a);
         t2=(-b+sqrt(delta))/(2*a);
         if(t2<=threshold&&t1<=threshold) {
             return false;
-        } else if(t2>threshold&&t1<=threshold) {
+        }
+        if(t2>threshold&&t1<=threshold) {
             distance=t2;
             return true;
-        } else if(t2>threshold&&t1>threshold) {
+        }
+        if(t2>threshold&&t1>threshold) {
             distance=t1;
             return true;
         }
-    }
+    
     return true;
 }
 
@@ -166,10 +168,8 @@ bool Plane::isIntersected(Ray ray, double& distance){
     double threshold=0.0005;
     distance = ((center-ray.origin).dot(normal))/(ray.direction.dot(normal));
  
-    if (distance <= 0)
-        return false;
 
-    return true;
+    return (distance >0);
 }
 
 class PointLight {
@@ -230,8 +230,9 @@ public:
     	this->length_x = length_x;
     	this->length_y = length_y;
         for(int i=0; i<length_x; i++)
-            for(int j=0; j<length_y; j++)
-                buffer[i][j]=Vector3();
+        {for(int j=0; j<length_y; j++)
+        {buffer[i][j]=Vector3();}
+        }
 //        objects = new Object*[MAX_OBJECTS];
 //        lights = new PointLight*[MAX_LIGHTS];
         this->camera = camera;
@@ -309,7 +310,7 @@ Vector3 World::startTrace(Ray ray,int depth){
     Object* nearestObject;
     double nearestDistance;
     nearestObject = getIntersectPoint(ray, nearestDistance);
-    if(nearestObject){
+    if(nearestObject!=nullptr){
         Vector3 color;
         double max_intensity = 0;
         Vector3 intersectPoint = ray.getPoint(nearestDistance);
@@ -334,9 +335,9 @@ Vector3 World::startTrace(Ray ray,int depth){
             }
         }
         return color*max_intensity;
-    } else {
-        return background;
     }
+        return background;
+    
 }
 
 void World::fillBuffer() {
@@ -365,7 +366,7 @@ void World::fillBuffer() {
 
 string read(string filename) {
     std::ifstream t(filename.c_str());
-    if (!t) {
+    if (t.fail()) {
         cout << "Error: file not found.\n";
         exit(EXIT_FAILURE);
     }  
@@ -404,11 +405,7 @@ struct Object_Data {
 vector<Object_Data> objects;
 
 bool isColorValid(Vector3 color) {
-    if (color.x < 0 || color.x > 255 || color.y < 0 ||
-        color.y > 255 || color.z < 0 || color.z > 255) {
-        return false;
-    }
-    return true;
+    return (color.x>=0 && color.x<=255 && color.y>=0 && color.y<=255 && color.z>=0 && color.z<=255);
 }
 
 void JsonParser(string str) {
@@ -431,12 +428,20 @@ void JsonParser(string str) {
                 cout << "Error: json parameter error.\n";
                 exit(EXIT_FAILURE);
             }
+         if(_camera["normal"].toMap()["z"].toString()=="}")
+         {
+             cout << "Error: json parameter error.\n";
+             exit(EXIT_FAILURE);
+         }
+            
+            
             if (_camera["center"].toMap()["x"].isNull() ||
                 _camera["center"].toMap()["y"].isNull() ||
                 _camera["center"].toMap()["z"].isNull() ||
                 _camera["normal"].toMap()["x"].isNull() ||
                 _camera["normal"].toMap()["y"].isNull() ||
-                _camera["normal"].toMap()["z"].isNull()) {
+                _camera["normal"].toMap()["z"].isNull()
+                ) {
                 cout << "Error: json parameter error.\n";
                 exit(EXIT_FAILURE);
             }
@@ -545,8 +550,8 @@ void JsonParser(string str) {
             }
         }
     } else {
-        qFatal(error.errorString().toUtf8().constData());
-        exit(1);
+cout << "Error: json parameter error.\n";
+       exit(EXIT_FAILURE);
     }
 }
 
