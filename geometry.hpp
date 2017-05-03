@@ -1,3 +1,4 @@
+//wode
 #include <QtGui>
 #include <QWidget>
 #include <QApplication>
@@ -300,6 +301,7 @@ void fillBufferThread(IndexWorld iWorld) {
             iWorld.world->buffer[i][j] = iWorld.world->startTrace(ray,0);
         }
     }
+
 }
 
 Vector3 World::startTrace(Ray ray,int depth){
@@ -341,10 +343,8 @@ void World::fillBuffer() {
     time_t start,end;
     start=time(NULL);
     thread* threads = new thread[thread_num];
-
     IndexWorld iWorld;
     iWorld.world = this;
-
     for (int i = 0; i < thread_num; i++) {
         iWorld.index = i;
         threads[i] = thread(fillBufferThread, iWorld);
@@ -353,7 +353,7 @@ void World::fillBuffer() {
     for (int i = 0; i < thread_num; i++) {
         threads[i].join();
     }
-
+        delete [] threads;
     end=time(NULL);
 //    cout<<"total time:"<<difftime(end,start)<<" "<<endl;
 }
@@ -406,151 +406,46 @@ bool isColorValid(Vector3 color) {
 }
 
 void JsonParser(string str) {
-    QString json = QString::fromStdString(str);
-    QJsonParseError error;
+    QString json = QString::fromStdString(str); QJsonParseError error;
     QJsonDocument jsonDocument = QJsonDocument::fromJson(json.toUtf8(), &error);
-    if (error.error == QJsonParseError::NoError) {
-        if (jsonDocument.isObject()) {
-            QVariantMap result = jsonDocument.toVariant().toMap();
-            if (result["camera"].isNull()) {
-                cout << "Error: json parameter error.\n";
-                exit(EXIT_FAILURE);
-            }
+    if (error.error == QJsonParseError::NoError) {if (jsonDocument.isObject()) {QVariantMap result= jsonDocument.toVariant().toMap();
+            if (result["camera"].isNull()) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
             QVariantMap _camera = result["camera"].toMap();
-            if (_camera["center"].isNull() ||
-                _camera["focus"].isNull() ||
-                _camera["normal"].isNull() ||
-                _camera["resolution"].isNull() ||
-                _camera["size"].isNull()) {
-                cout << "Error: json parameter error.\n";
-                exit(EXIT_FAILURE);
-            }
-         if(_camera["normal"].toMap()["z"].toString()=="}")
-         {
-             cout << "Error: json parameter error.\n";
-             exit(EXIT_FAILURE);
-         }
-            
-            
-            if (_camera["center"].toMap()["x"].isNull() ||
-                _camera["center"].toMap()["y"].isNull() ||
-                _camera["center"].toMap()["z"].isNull() ||
-                _camera["normal"].toMap()["x"].isNull() ||
-                _camera["normal"].toMap()["y"].isNull() ||
-                _camera["normal"].toMap()["z"].isNull()
-                ) {
-                cout << "Error: json parameter error.\n";
-                exit(EXIT_FAILURE);
-            }
-            camera.center.x = _camera["center"].toMap()["x"].toDouble();
-            camera.center.y = _camera["center"].toMap()["y"].toDouble();
-            camera.center.z = _camera["center"].toMap()["z"].toDouble();
-            camera.focus = _camera["focus"].toDouble();
-            camera.normal.x = _camera["normal"].toMap()["x"].toDouble();
-            camera.normal.y = _camera["normal"].toMap()["y"].toDouble();
+            if (_camera["center"].isNull() ||_camera["focus"].isNull()||_camera["normal"].isNull() ||
+                _camera["resolution"].isNull() || _camera["size"].isNull()){
+                cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
+         if(_camera["normal"].toMap()["z"].toString()=="}"){
+             cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
+            if (_camera["center"].toMap()["x"].isNull() || _camera["center"].toMap()["y"].isNull() ||_camera["center"].toMap()["z"].isNull() ||_camera["normal"].toMap()["x"].isNull() ||             _camera["normal"].toMap()["y"].isNull() ||_camera["normal"].toMap()["z"].isNull()) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
+            camera.center.x = _camera["center"].toMap()["x"].toDouble(); camera.center.y = _camera["center"].toMap()["y"].toDouble();camera.center.z = _camera["center"].toMap()["z"].toDouble();
+            camera.focus = _camera["focus"].toDouble(); camera.normal.x = _camera["normal"].toMap()["x"].toDouble();camera.normal.y = _camera["normal"].toMap()["y"].toDouble();
             camera.normal.z = _camera["normal"].toMap()["z"].toDouble();
-            if (_camera["resolution"].toList().size() < 2 ||
-                _camera["size"].toList().size() < 2) {
-                cout << "Error: json parameter error.\n";
-                exit(EXIT_FAILURE);
-            }
-            camera.resolution_x = _camera["resolution"].toList().at(0).toDouble();
-            camera.resolution_y = _camera["resolution"].toList().at(1).toDouble();
-            camera.length_x = _camera["size"].toList().at(0).toDouble();
-            camera.length_y = _camera["size"].toList().at(1).toDouble();
-            if (camera.length_x <= 0 || camera.length_y <= 0 ||
-                camera.resolution_x <= 0 || camera.resolution_y <= 0) {
-                cout << "Error: json parameter error.\n";
-                exit(EXIT_FAILURE);
-            }
-            if (result["lights"].isNull()) {
-                cout << "Error: json parameter error.\n";
-                exit(EXIT_FAILURE);
-            }
-            foreach(QVariant tmp, result["lights"].toList())
-            {    Light l;
-                if (tmp.toMap()["intensity"].isNull() ||
-                    tmp.toMap()["location"].isNull() ||
-                    tmp.toMap()["location"].toMap()["x"].isNull() ||
-                    tmp.toMap()["location"].toMap()["y"].isNull() ||
-                    tmp.toMap()["location"].toMap()["z"].isNull()) {
-                    cout << "Error: json parameter error.\n";
-                    exit(EXIT_FAILURE);}
-                l.intensity = tmp.toMap()["intensity"].toDouble();
-                if (l.intensity < 0 || l.intensity > 1) {
-                    cout << "Error: json parameter error.\n";
-                    exit(EXIT_FAILURE);}
-                l.location.x = tmp.toMap()["location"].toMap()["x"].toDouble();
-                l.location.y = tmp.toMap()["location"].toMap()["y"].toDouble();
-                l.location.z = tmp.toMap()["location"].toMap()["z"].toDouble();
-                lights.push_back(l);
-            }
-            if (result["objects"].isNull()) {
-                cout << "Error: json parameter error.\n";
-                exit(EXIT_FAILURE);
-            }
-            foreach(QVariant tmp, result["objects"].toList())
-            {        Object_Data o;
-                if (tmp.toMap()["center"].isNull() ||
-                    tmp.toMap()["center"].toMap()["x"].isNull() ||
-                    tmp.toMap()["center"].toMap()["y"].isNull() ||
-                    tmp.toMap()["center"].toMap()["z"].isNull() ||
-                    tmp.toMap()["color"].isNull() ||
-                    tmp.toMap()["color"].toMap()["r"].isNull() ||
-                    tmp.toMap()["color"].toMap()["g"].isNull() ||
-                    tmp.toMap()["color"].toMap()["b"].isNull() ||
-                    tmp.toMap()["lambert"].isNull() ||
-                    tmp.toMap()["type"].isNull()) {
-                    cout << "Error: json parameter error.\n";
-                    exit(EXIT_FAILURE);}
-                o.center.x = tmp.toMap()["center"].toMap()["x"].toDouble();
-                o.center.y = tmp.toMap()["center"].toMap()["y"].toDouble();
-                o.center.z = tmp.toMap()["center"].toMap()["z"].toDouble();
-                o.color.x = tmp.toMap()["color"].toMap()["r"].toDouble();
-                o.color.y = tmp.toMap()["color"].toMap()["g"].toDouble();
-                o.color.z = tmp.toMap()["color"].toMap()["b"].toDouble();
-                o.lambert = tmp.toMap()["lambert"].toDouble();
-                if (o.lambert < 0 || o.lambert > 1) {
-                    cout << "Error: json parameter error.\n";
-                    exit(EXIT_FAILURE);
-                }
-                o.type = tmp.toMap()["type"].toString().toStdString();
-                if (o.type == "sphere") {
-                    if (tmp.toMap()["radius"].isNull()) {
-                        cout << "Error: json parameter error.\n";
-                        exit(EXIT_FAILURE);
-                    }
+        if (_camera["resolution"].toList().size() < 2 ||_camera["size"].toList().size()<2){cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
+            camera.resolution_x = _camera["resolution"].toList().at(0).toDouble();camera.resolution_y = _camera["resolution"].toList().at(1).toDouble();
+            camera.length_x = _camera["size"].toList().at(0).toDouble();camera.length_y = _camera["size"].toList().at(1).toDouble();
+            if (camera.length_x <= 0 || camera.length_y <= 0 ||camera.resolution_x <= 0 || camera.resolution_y <= 0) {
+                cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
+            if (result["lights"].isNull()) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE); }
+            foreach(QVariant tmp, result["lights"].toList()){Light l;
+                if (tmp.toMap()["intensity"].isNull() ||tmp.toMap()["location"].isNull() ||tmp.toMap()["location"].toMap()["x"].isNull() ||tmp.toMap()["location"].toMap()["y"].isNull() ||
+                    tmp.toMap()["location"].toMap()["z"].isNull()) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
+                l.intensity = tmp.toMap()["intensity"].toDouble();if (l.intensity < 0 || l.intensity > 1) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}l.location.x = tmp.toMap()["location"].toMap()["x"].toDouble();l.location.y = tmp.toMap()["location"].toMap()["y"].toDouble();l.location.z = tmp.toMap()["location"].toMap()["z"].toDouble();lights.push_back(l);}
+            if (result["objects"].isNull()) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
+            foreach(QVariant tmp, result["objects"].toList()){        Object_Data o;
+                if (tmp.toMap()["center"].isNull() ||tmp.toMap()["center"].toMap()["x"].isNull() ||tmp.toMap()["center"].toMap()["y"].isNull() ||tmp.toMap()["center"].toMap()["z"].isNull() ||
+                    tmp.toMap()["color"].isNull() ||tmp.toMap()["color"].toMap()["r"].isNull() ||tmp.toMap()["color"].toMap()["g"].isNull() ||tmp.toMap()["color"].toMap()["b"].isNull() ||
+                    tmp.toMap()["lambert"].isNull() ||tmp.toMap()["type"].isNull()) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
+                o.center.x = tmp.toMap()["center"].toMap()["x"].toDouble();o.center.y = tmp.toMap()["center"].toMap()["y"].toDouble();o.center.z = tmp.toMap()["center"].toMap()["z"].toDouble();
+                o.color.x = tmp.toMap()["color"].toMap()["r"].toDouble();o.color.y = tmp.toMap()["color"].toMap()["g"].toDouble();o.color.z = tmp.toMap()["color"].toMap()["b"].toDouble();
+                o.lambert = tmp.toMap()["lambert"].toDouble();if (o.lambert < 0 || o.lambert > 1) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
+                o.type = tmp.toMap()["type"].toString().toStdString();if (o.type == "sphere") {if (tmp.toMap()["radius"].isNull()) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
                     o.radius = tmp.toMap()["radius"].toDouble();
-                    if (o.radius < 0) {
-                        cout << "Error: json parameter error.\n";
-                        exit(EXIT_FAILURE);
-                    }
-                }
-                if (o.type == "plane") {
-                    if (tmp.toMap()["normal"].isNull() ||
-                        tmp.toMap()["normal"].toMap()["x"].isNull() ||
-                        tmp.toMap()["normal"].toMap()["y"].isNull() ||
-                        tmp.toMap()["normal"].toMap()["z"].isNull()) {
-                        cout << "Error: json parameter error.\n";
-                        exit(EXIT_FAILURE);
-                    }
-                    o.normal.x = tmp.toMap()["normal"].toMap()["x"].toDouble();
-                    o.normal.y = tmp.toMap()["normal"].toMap()["y"].toDouble();
-                    o.normal.z = tmp.toMap()["normal"].toMap()["z"].toDouble();
-                }
-                if (!isColorValid(o.color)) {
-                    cout << "Error: json parameter error.\n";
-                    exit(EXIT_FAILURE);
-                }
-                objects.push_back(o);
-
-            }
-        }
-    } else {
-cout << "Error: json parameter error.\n";
-       exit(EXIT_FAILURE);
-    }
-}
+                    if (o.radius < 0) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}}
+                if (o.type == "plane") {if (tmp.toMap()["normal"].isNull() ||tmp.toMap()["normal"].toMap()["x"].isNull() ||tmp.toMap()["normal"].toMap()["y"].isNull() ||
+                        tmp.toMap()["normal"].toMap()["z"].isNull()) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}
+                    o.normal.x = tmp.toMap()["normal"].toMap()["x"].toDouble();o.normal.y = tmp.toMap()["normal"].toMap()["y"].toDouble();o.normal.z = tmp.toMap()["normal"].toMap()["z"].toDouble();}
+                if (!isColorValid(o.color)) {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}objects.push_back(o);}}
+    } else {cout << "Error: json parameter error.\n";exit(EXIT_FAILURE);}}
 
 World* init(int thread_num) {
     World* world;

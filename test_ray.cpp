@@ -139,19 +139,15 @@ TEST_CASE( "Test World:", "[geometry]" ) {
     world_me->addObject(plane3);
     world_me->addObject(sphere3);
     world_me->addLight(l3);
-    
     Ray ray(Vector3(500, -500, 0), Vector3(0, 0, 500) - Vector3(500, -500, 0));
-    
     double distance;
     Plane *plane2 = new Plane(Vector3(255, 255, 255), Vector3(0, 500, 0), 1, Vector3(0, -1, 0));
     REQUIRE(plane2->isIntersected(ray, distance) == Approx(true));
     REQUIRE(distance == Approx(1000*sqrt(3)));
-    
     Vector3 intersectedPoint = ray.getPoint(distance);
     REQUIRE(intersectedPoint.x == Approx(-500));
     REQUIRE(intersectedPoint.y == Approx(500));
     REQUIRE(intersectedPoint.z == Approx(1000));
-    
     Ray ray1(Vector3(0, 0, -1000), Vector3(-500, 500, 1000) - Vector3(0, 0, -1000));
     Plane plane1(Vector3(255, 255, 255), Vector3(), 1, Vector3(0, 0, 1));
     REQUIRE(plane1.isIntersected(ray1, distance) == Approx(true));
@@ -159,14 +155,15 @@ TEST_CASE( "Test World:", "[geometry]" ) {
     REQUIRE(intersectedPoint1.x == Approx(-250));
     REQUIRE(intersectedPoint1.y == Approx(250));
     REQUIRE(intersectedPoint1.z == Approx(0));
-    world_me->fillBuffer();
-    Vector3 co = world_me->buffer[512 + (int)intersectedPoint1.x][512 + (int)intersectedPoint1.y];
-    REQUIRE(co.x == Approx(0));
-    REQUIRE(co.y == Approx(0));
-    REQUIRE(co.z == Approx(0));
+//    world_me->fillBuffer();
+//    Vector3 co = world_me->buffer[512 + (int)intersectedPoint1.x][512 + (int)intersectedPoint1.y];
+//    REQUIRE(co.x == Approx(0));
+//    REQUIRE(co.y == Approx(0));
+//    REQUIRE(co.z == Approx(0));
+//    delete world_me;
 }
 
-TEST_CASE( "Test JsonParser (good):", "[geometry]" ) {
+TEST_CASE( "Test JsonParser (1):", "[geometry]" ) {
     string str = read("/vagrant/tests/scene0.json");
     JsonParser(str);
     REQUIRE(camera.center.x == Approx(0));
@@ -200,6 +197,22 @@ TEST_CASE( "Test JsonParser (good):", "[geometry]" ) {
     REQUIRE(objects[0].color.z == Approx(0));
     
 }
+
+TEST_CASE( "Test JsonParser (2):", "[geometry]" ) {
+    string str = read("/vagrant/tests/scene2.json");
+    JsonParser(str);
+    REQUIRE(camera.center.x == Approx(0));
+    REQUIRE(camera.center.y == Approx(0));
+    REQUIRE(camera.center.z == Approx(0));
+    
+    REQUIRE(camera.normal.x == Approx(0));
+    REQUIRE(camera.normal.y == Approx(0));
+    REQUIRE(camera.normal.z == Approx(1));
+    
+    REQUIRE(camera.focus == Approx(10));
+    
+}
+
 
 
 

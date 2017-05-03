@@ -1,3 +1,4 @@
+//我的
 #include <QtGui>
 #include <QWidget>
 #include <QApplication>
@@ -64,6 +65,7 @@ int main(int argc, char **argv)
         
         image.save(QString::fromStdString(output_name));
     }
+        delete world;
 }
 
 
